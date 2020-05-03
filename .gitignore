@@ -1,0 +1,21 @@
+# python files
+*.pyc
+
+# python cache
+*__pycache__/
+*ipynb_checkpoints
+
+# JetBrains IDE
+.idea/
+
+# MacOS trash
+.DS_Store
+
+# virtual environment
+venv/
+
+# database
+database.db
+
+# vk personal data
+*vk_config.v2.json
