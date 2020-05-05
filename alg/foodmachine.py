@@ -96,7 +96,7 @@ class foodMachine:
                     t = self.tasks[task_ids[i]]
                     t_coords = t[3]
                     dct = self._havdist(llat, llon, *t_coords) # distance from current to t
-                    if currdist + dct <= maxl and currw + t[1] <= maxw:
+                    if (currdist + dct <= maxl) and (currw + t[1] <= maxw):
                         llat = t_coords[0]
                         llon = t_coords[1]
                         currdist += dct
@@ -157,6 +157,8 @@ class foodMachine:
         returns a pair of order text and an array to be sent as a confirmation'''
         unformatted = self._find_optimal_route(coords, maxw, maxl)        
         ans = self._format_route(unformatted)
+        if len(unformatted) == 0:
+            return ans, []
         return ans, list(unformatted[2])
     
     def confirm(self, ids):
