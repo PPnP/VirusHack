@@ -19,6 +19,3 @@ database.db
 
 # vk personal data
 *vk_config.v2.json
-
-# experimental code
-*experiments
