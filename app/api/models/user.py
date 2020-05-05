@@ -1,7 +1,7 @@
 from app.api.models import *
 
 
-class User(BaseModel):
+class RequestUser(BaseModel):
     id = AutoField(primary_key=True)
     vk_id = TextField()
 
@@ -16,7 +16,17 @@ class User(BaseModel):
     isElevator = BooleanField(default=False)
 
     isInfo = BooleanField(default=False)
-    state = TextField(default='default')
+    state = TextField(null=True, default=None)
 
     class Meta:
-        db_table = 'Users'
+        db_table = 'RequestUsers'
+
+
+class VolunteerUser(BaseModel):
+    id = AutoField(primary_key=True)
+    vk_id = TextField()
+
+    state = TextField(null=True, default=None)
+
+    class Meta:
+        db_table = 'VolunteerUsers'

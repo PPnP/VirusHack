@@ -1,9 +1,9 @@
 import random
 import string
-
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
+
 from bots.request import vk
-from app.api.models.user import User
+from app.api.models.user import RequestUser
 from app.api.models.order import Order
 
 
@@ -21,14 +21,14 @@ def send_message(id, message, attachment='', keyboard=get_default_keyboard()):
 
 
 def get_info(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.state = 'save_name'
     user.save()
     send_message(id, 'Введите Ваше имя')
 
 
 def save_name(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.name = data['text']
     user.state = 'save_phone'
     user.save()
@@ -36,7 +36,7 @@ def save_name(id, data):
 
 
 def save_phone(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.phone = data['text']
     user.state = 'save_city'
     user.save()
@@ -44,7 +44,7 @@ def save_phone(id, data):
 
 
 def save_city(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.city = data['text']
     user.state = 'save_street'
     user.save()
@@ -52,7 +52,7 @@ def save_city(id, data):
 
 
 def save_street(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.street = data['text']
     user.state = 'save_building'
     user.save()
@@ -60,7 +60,7 @@ def save_street(id, data):
 
 
 def save_building(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.building = data['text']
     user.state = 'save_apartment'
     user.save()
@@ -68,7 +68,7 @@ def save_building(id, data):
 
 
 def save_apartment(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.apartment = data['text']
     user.state = 'save_floor'
     user.save()
@@ -76,7 +76,7 @@ def save_apartment(id, data):
 
 
 def save_floor(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.floor = data['text']
     user.state = 'save_elevator_option'
     user.save()
@@ -88,7 +88,7 @@ def save_floor(id, data):
 
 
 def save_elevator_option(id, data, option):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.isElevator = option
     user.state = 'default'
     user.save()
@@ -103,7 +103,7 @@ def save_elevator_option(id, data, option):
 
 
 def confirm_data(id, data, option):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     if option:
         user.isInfo = True
         user.save()
@@ -113,8 +113,8 @@ def confirm_data(id, data, option):
 
 
 def make_request(id, data):
-    user = User.get(User.vk_id == id)
-    user.state = 'make_order_from_input'
+    user = RequestUser.get(RequestUser.vk_id == id)
+    user.state = 'input_order'
     user.save()
     kb = VkKeyboard(one_time=True)
     kb.add_button(label='Показать популярные', color=VkKeyboardColor.DEFAULT, payload={'action': 'show_popular'})
@@ -123,38 +123,19 @@ def make_request(id, data):
 
 
 def show_popular(id, data):
-    user = User.get(User.vk_id == id)
-    order = Order.create(owner=user)
     kb = VkKeyboard(one_time=True)
-    kb.add_button(label='Гречка, 1кг', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
-    kb.add_button(label='Белый хлеб, 1 батон', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Белый хлеб "Harris"', 'order_id': str(order.id)})
+    kb.add_button(label='Гречка, 1кг', color=VkKeyboardColor.DEFAULT, payload={'action': 'show_popular'})
+    kb.add_button(label='Белый хлеб, 1 батон', color=VkKeyboardColor.DEFAULT, payload={'action': 'show_popular'})
     kb.add_line()
-    kb.add_button(label='Манка, 500г', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
-    kb.add_button(label='Яйца, 10 штук', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Печенье "Любятово', 'order_id': str(order.id)})
+    kb.add_button(label='Манка, 500г', color=VkKeyboardColor.DEFAULT, payload={'action': 'show_popular'})
+    kb.add_button(label='Яйца, 10 штук', color=VkKeyboardColor.DEFAULT, payload={'action': 'show_popular'})
     kb.add_line()
     kb.add_button(label='Завершить оформление заказа', color=VkKeyboardColor.PRIMARY, payload={'action': 'save_order'})
     keyboard = kb.get_keyboard()
     send_message(id, 'Выберите товар или завершите оформление', keyboard=keyboard)
 
 
-def save_popular(id, data, order_id):
-    order = Order.get(Order.id == order_id)
-    order.request += data['text']
-    order.save()
-    kb = VkKeyboard(one_time=True)
-    kb.add_button(label='Гречка, 1кг', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
-    kb.add_button(label='Белый хлеб, 1 батон', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Белый хлеб "Harris"', 'order_id': str(order.id)})
-    kb.add_line()
-    kb.add_button(label='Манка, 500г', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
-    kb.add_button(label='Яйца, 10 штук', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Печенье "Любятово', 'order_id': str(order.id)})
-    kb.add_line()
-    kb.add_button(label='Завершить оформление заказа', color=VkKeyboardColor.PRIMARY, payload={'action': 'save_order'})
-    keyboard = kb.get_keyboard()
-    send_message(id, 'Выберите товар или завершите оформление', keyboard=keyboard)
-
-
-def make_order_from_input(id, data):
-    user = User.get(User.vk_id == id)
+def input_order(id, data):
     kb = VkKeyboard(one_time=True)
     kb.add_button(label='Продолжить оформление', color=VkKeyboardColor.PRIMARY, payload={'action': 'show_popular'})
     kb.add_button(label='Завершить оформление', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_order'})
@@ -163,7 +144,7 @@ def make_order_from_input(id, data):
 
 
 def save_order(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     user.state = 'default'
     user.save()
-    send_message(id, 'Заказ успешно создан! Мы будем информировать Вас о статусе его выполнения')
+    send_message(id, 'Ваш заказ №' + str(random.randint(1, 100)) + ' успешно создан ✅\nМы будем информировать Вас о статусе его выполнения!')

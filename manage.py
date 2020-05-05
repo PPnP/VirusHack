@@ -1,7 +1,7 @@
 from app import app, manager
 from app.api.routes import api
 from app.api.models import db
-from app.api.models.user import User
+from app.api.models.user import RequestUser, VolunteerUser
 from app.api.models.order import Order
 
 
@@ -13,7 +13,7 @@ def runserver():
 
 @manager.command
 def migrate():
-    tables = [User, Order]
+    tables = [RequestUser, VolunteerUser, Order]
     db.drop_tables(tables)
     db.create_tables(tables)
 
