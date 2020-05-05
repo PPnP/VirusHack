@@ -123,19 +123,38 @@ def make_request(id, data):
 
 
 def show_popular(id, data):
-    kb = VkKeyboard(one_time=False)
-    kb.add_button(label='Гречка 1кг', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular'})
-    kb.add_button(label='Белый хлеб "Harris"', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Белый хлеб "Harris"', 'order_id': str(order.id)})
-    kb.add_line()
-    kb.add_button(label='Манка 500г', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular'})
-    kb.add_button(label='Печенье "Любятово"', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Печенье "Любятово', 'order_id': str(order.id)})
-    keyboard = kb.get_keyboard()
-    send_message(id, 'Выберете товары', keyboard=keyboard)
-
-
-def save_popular(id, data):
     user = User.get(User.vk_id == id)
-    Order.create(owner=user, request=data['text'])
+    order = Order.create(owner=user)
+    kb = VkKeyboard(one_time=True)
+    kb.add_button(label='Гречка, 1кг', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
+    kb.add_button(label='Белый хлеб "Harris", 1 батон', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Белый хлеб "Harris"', 'order_id': str(order.id)})
+    kb.add_line()
+    kb.add_button(label='Манка, 500г', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
+    kb.add_button(label='Печенье "Любятово", 1 пачка', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Печенье "Любятово', 'order_id': str(order.id)})
+    kb.add_line()
+    kb.add_button(label='Завершить оформление заказа', color=VkKeyboardColor.PRIMARY, payload={'action': 'make_order_from_options'})
+    keyboard = kb.get_keyboard()
+    send_message(id, 'Выберите товар или завершите оформление', keyboard=keyboard)
+
+
+def save_popular(id, data, order_id):
+    order = Order.get(Order.id == order_id)
+    order.request += data['text']
+    order.save()
+    kb = VkKeyboard(one_time=True)
+    kb.add_button(label='Гречка, 1кг', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
+    kb.add_button(label='Белый хлеб, 1 батон', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Белый хлеб "Harris"', 'order_id': str(order.id)})
+    kb.add_line()
+    kb.add_button(label='Манка, 500г', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'order_id': str(order.id)})
+    kb.add_button(label='Яйца, 10 штук', color=VkKeyboardColor.DEFAULT, payload={'action': 'save_popular', 'option': 'Печенье "Любятово', 'order_id': str(order.id)})
+    kb.add_line()
+    kb.add_button(label='Завершить оформление заказа', color=VkKeyboardColor.PRIMARY, payload={'action': 'make_order_from_options'})
+    keyboard = kb.get_keyboard()
+    send_message(id, 'Выберите товар или завершите оформление', keyboard=keyboard)
+
+
+def make_order_from_options(id, data):
+    user = User.get(User.vk_id == id)
     user.state = 'default'
     user.save()
     send_message(id, 'Заказ успешно создан! Мы будем информировать Вас о статусе его выполнения')
