@@ -37,8 +37,8 @@ def action_recognition(id, data, payload):
         show_popular(id, data)
     elif payload['action'] == 'save_popular':
         save_popular(id, data, payload['order_id'])
-    elif payload['action'] == 'make_order_from_options':
-        make_order_from_options(id, data)
+    elif payload['action'] == 'save_order':
+        save_order(id, data)
 
 
 def response_generator(id, data):
