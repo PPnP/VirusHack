@@ -1,14 +1,14 @@
 from flask import json
 
-from app.api.models.user import User
+from app.api.models.user import RequestUser
 from bots.request.actions import *
 
 
 def request_recognition(id, data):
     try:
-        User.get(User.vk_id == id)
-    except User.DoesNotExist:
-        User.create(vk_id=id)
+        RequestUser.get(RequestUser.vk_id == id)
+    except RequestUser.DoesNotExist:
+        RequestUser.create(vk_id=id)
         send_message(id=id, message='Привет!\nПомощь Рядом в это непростое время :)\n\nВозможности 👇')
     else:
         message_handler(id, data)
@@ -23,7 +23,7 @@ def message_handler(id, data):
 
 
 def action_recognition(id, data, payload):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     if payload['action'] == 'make_request':
         if not user.isInfo:
             get_info(id, data)
@@ -35,14 +35,12 @@ def action_recognition(id, data, payload):
         confirm_data(id, data, payload['answer'])
     elif payload['action'] == 'show_popular':
         show_popular(id, data)
-    elif payload['action'] == 'save_popular':
-        save_popular(id, data, payload['order_id'])
     elif payload['action'] == 'save_order':
         save_order(id, data)
 
 
 def response_generator(id, data):
-    user = User.get(User.vk_id == id)
+    user = RequestUser.get(RequestUser.vk_id == id)
     if user.state is not None:
         eval(str(user.state) + '(id, data)')
     else:
