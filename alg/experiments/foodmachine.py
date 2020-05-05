@@ -10,7 +10,10 @@ class foodMachine:
     shops = [] # [(location_1, coords_1), (location_2, coords_2)]
     
     def __init__(self):
-        pass
+        weight_encoder = {}
+        cost_encoder = {}
+        tasks = []
+        shops = []
     
     def _w(self, name):
         '''returns weight by name
